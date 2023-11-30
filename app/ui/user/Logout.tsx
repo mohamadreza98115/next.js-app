@@ -1,7 +1,7 @@
 'use client'
 import React from 'react';
 import {ArrowLeftOnRectangleIcon} from "@heroicons/react/20/solid";
-import classNames from "classnames";
+import classNames from "clsx";
 import {signOut} from "next-auth/react";
 
 const Logout = ({active}: { active: boolean }) => {

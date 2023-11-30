@@ -6,7 +6,7 @@ import {FieldValues, useForm} from "react-hook-form";
 import {z} from 'zod';
 import {zodResolver} from "@hookform/resolvers/zod";
 import {EnvelopeIcon, LockClosedIcon} from "@heroicons/react/20/solid";
-import {signIn} from "next-auth/react";
+import {signIn, useSession} from "next-auth/react";
 
 const schema = z.object({
     email: z.string().email("Invalid email format"),
@@ -16,7 +16,9 @@ const schema = z.object({
 type FormFieldTypes = z.input<typeof schema>;
 
 const input_error_classes = "block w-full rounded-md border-0 py-1.5 pr-10 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
-const homePage = "http://localhost:3000"
+const adminPage = "http://localhost:3000/admin";
+const userPage = "http://localhost:3000/user";
+const homePage = "http://localhost:3000";
 
 const Login = ({callbackUrl}: { callbackUrl?: string }) => {
     const {
@@ -26,12 +28,17 @@ const Login = ({callbackUrl}: { callbackUrl?: string }) => {
         formState: {errors}
     } = useForm<FormFieldTypes>({resolver: zodResolver(schema)});
 
+    const {data: session} = useSession();
+
+    const isAdmin = session?.user.role === 'ADMIN';
+    const isUser = session?.user.role === "USER";
+
     const onSubmit = async (values: FieldValues) => {
         await signIn("credentials", {
             email: values?.email,
             password: values?.password,
             redirect: true,
-            callbackUrl: callbackUrl ?? homePage
+            callbackUrl: isUser ? userPage : adminPage
         });
         reset();
     }

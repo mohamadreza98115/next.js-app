@@ -45,8 +45,8 @@ export const authOptions: NextAuthOptions = {
     ],
     callbacks: {
         async jwt({token, user}) {
-            if (user) token.role = user.role;
-            return token;
+            // if (user) token.role = user.role;
+            return {...token,...user};
         },
         //     If we want to use the role in client components
         async session({session, token}) {

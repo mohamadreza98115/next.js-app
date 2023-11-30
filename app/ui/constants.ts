@@ -1,4 +1,7 @@
-import {ChartPieIcon, DocumentDuplicateIcon, HomeIcon, ShoppingBagIcon, UserGroupIcon} from "@heroicons/react/20/solid";
+import {HomeIcon, ShoppingBagIcon, UserGroupIcon} from "@heroicons/react/20/solid";
+
+
+export const baseUrl = "http://localhost:3000";
 
 export const userNavigation = [
     {name: 'Your profile', href: '#'},

@@ -1,5 +1,6 @@
 import React, {ReactNode} from 'react';
 import {Metadata} from "next";
+import Navbar from "@/app/ui/user/Navbar";
 
 export const metadata: Metadata = {
     title: "E-Commerce"
@@ -13,6 +14,7 @@ const UserLayout = ({children}: Props) => {
     return (
         <html>
         <body>
+        <Navbar/>
         {children}
         </body>
         </html>

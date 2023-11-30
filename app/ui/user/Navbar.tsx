@@ -7,7 +7,7 @@ import {ShoppingCartIcon, UserIcon} from "@heroicons/react/20/solid";
 import ProfileImage from '@/public/profileImage.jpg'
 import Image from "next/image";
 import {useSession} from "next-auth/react";
-import Logout from "@/app/ui/e-commerce/Logout";
+import Logout from "@/app/ui/user/Logout";
 
 type ClassNames = string[];
 
@@ -51,7 +51,7 @@ export default function Navbar() {
                                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                                     {/* Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" */}
                                     <Link
-                                        href="/products"
+                                        href="/user/products"
                                         className="inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-500"
                                     >
                                         Products
@@ -63,13 +63,13 @@ export default function Navbar() {
                                         Team
                                     </Link>
                                     <Link
-                                        href="/projects"
+                                        href="/user/projects"
                                         className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
                                     >
                                         Projects
                                     </Link>
                                     <Link
-                                        href="/calendar"
+                                        href="/user/calendar"
                                         className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
                                     >
                                         Calendar
@@ -77,7 +77,7 @@ export default function Navbar() {
                                 </div>
                             </div>
                             <div className="sm:ml-6 flex items-center">
-                                <Link href={"/orders"}>
+                                <Link href={"/user/orders"}>
                                     <button
                                         type="button"
                                         className="rounded-full bg-transparent text-gray-400 p-1 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -121,7 +121,7 @@ export default function Navbar() {
                                                 <Menu.Item>
                                                     {({active}) => (
                                                         <Link
-                                                            href="/profile"
+                                                            href="/user/profile"
                                                             className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
                                                         >
                                                             <UserIcon className="h-5 w-5 inline pr-1 pb-1"
