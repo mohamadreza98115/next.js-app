@@ -8,6 +8,8 @@ import ProfileImage from '@/public/profileImage.jpg'
 import Image from "next/image";
 import {useSession} from "next-auth/react";
 import Logout from "@/app/ui/user/Logout";
+import {usePathname} from "next/navigation";
+import {userNav} from "@/app/ui/constants";
 
 type ClassNames = string[];
 
@@ -17,6 +19,7 @@ function classNames(...classes: ClassNames): string {
 
 export default function Navbar() {
     const {data, status} = useSession();
+    const pathname = usePathname();
     return (
         <Disclosure as="nav" className="bg-white shadow">
             {({open}) => (
@@ -48,33 +51,23 @@ export default function Navbar() {
                                         alt="Your Company"
                                     />
                                 </div>
+
+                                {/* Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" */}
                                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                                    {/* Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" */}
-                                    <Link
-                                        href="/user/products"
-                                        className="inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-500"
-                                    >
-                                        Products
-                                    </Link>
-                                    <Link
-                                        href="/"
-                                        className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                                    >
-                                        Team
-                                    </Link>
-                                    <Link
-                                        href="/user/projects"
-                                        className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                                    >
-                                        Projects
-                                    </Link>
-                                    <Link
-                                        href="/user/calendar"
-                                        className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                                    >
-                                        Calendar
-                                    </Link>
+                                    {
+                                        userNav.map((nav, i) => {
+                                            const current = pathname.endsWith(nav.href)
+                                            return <Link
+                                                key={i}
+                                                href={nav.href}
+                                                className={classNames(current ? "border-indigo-500 text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700","inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700")}
+                                            >
+                                                {nav.name}
+                                            </Link>
+                                        })
+                                    }
                                 </div>
+
                             </div>
                             <div className="sm:ml-6 flex items-center">
                                 <Link href={"/user/orders"}>
@@ -156,37 +149,24 @@ export default function Navbar() {
                     </div>
 
                     <Disclosure.Panel className="sm:hidden">
+
                         <div className="space-y-1 pb-3 pt-2">
                             {/* Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700" */}
-                            <Disclosure.Button
-                                as="a"
-                                href="#"
-                                className="block border-l-4 border-indigo-500 bg-indigo-50 py-2 pl-3 pr-4 text-base font-medium text-indigo-700"
-                            >
-                                Dashboard
-                            </Disclosure.Button>
-                            <Disclosure.Button
-                                as="a"
-                                href="#"
-                                className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-                            >
-                                Team
-                            </Disclosure.Button>
-                            <Disclosure.Button
-                                as="a"
-                                href="#"
-                                className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-                            >
-                                Projects
-                            </Disclosure.Button>
-                            <Disclosure.Button
-                                as="a"
-                                href="#"
-                                className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-                            >
-                                Calendar
-                            </Disclosure.Button>
+                            {
+                                userNav.map((nav, i) => {
+                                    const current = pathname.endsWith(nav.href)
+                                    return <Disclosure.Button
+                                        key={i}
+                                        as="a"
+                                        href="#"
+                                        className={classNames(current ? "bg-indigo-50 border-indigo-500 text-indigo-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700" : "", "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700")}
+                                    >
+                                        {nav.name}
+                                    </Disclosure.Button>
+                                })
+                            }
                         </div>
+
                     </Disclosure.Panel>
                 </>
             )}

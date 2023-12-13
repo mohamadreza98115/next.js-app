@@ -1,8 +1,9 @@
+'use client'
 import React, {Fragment} from 'react';
 import {Cog6ToothIcon, XMarkIcon} from "@heroicons/react/24/outline";
-import {navigation, teams} from "@/app/ui/constants";
+import {navigation} from "@/app/ui/constants";
 import {Dialog, Transition} from "@headlessui/react";
-
+import {usePathname} from "next/navigation";
 
 type ClassNames = string[];
 
@@ -14,6 +15,7 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: {
     sidebarOpen: boolean,
     setSidebarOpen: (value: boolean) => void;
 }) => {
+    const pathname = usePathname();
     return (
         <>
             <Transition.Root show={sidebarOpen} as={Fragment}>
@@ -70,17 +72,19 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: {
                                         <ul role="list" className="flex flex-1 flex-col gap-y-7">
                                             <li>
                                                 <ul role="list" className="-mx-2 space-y-1">
-                                                    {navigation.map((item) => (
-                                                        <li key={item.name}>
+                                                    {navigation.map((item) => {
+                                                        const currentPath = pathname.endsWith(item.href)
+                                                        return <li key={item.name}>
                                                             <a href={item.href}
-                                                               className={classNames(item.current ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold')}>
+                                                               className={classNames(currentPath ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold')}>
                                                                 <item.icon
-                                                                    className={classNames(item.current ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600', 'h-6 w-6 shrink-0')}
+                                                                    className={classNames(currentPath ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600', 'h-6 w-6 shrink-0')}
                                                                     aria-hidden="true"/>
                                                                 {item.name}
                                                             </a>
                                                         </li>
-                                                    ))}
+                                                    })
+                                                    }
                                                 </ul>
                                             </li>
                                             <li className="mt-auto">
@@ -119,17 +123,19 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: {
                         <ul role="list" className="flex flex-1 flex-col gap-y-7">
                             <li>
                                 <ul role="list" className="-mx-2 space-y-1">
-                                    {navigation.map((item) => (
-                                        <li key={item.name}>
+                                    {navigation.map((item) => {
+                                        const currentPath = pathname.endsWith(item.href)
+                                        return <li key={item.name}>
                                             <a href={item.href}
-                                               className={classNames(item.current ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold')}>
+                                               className={classNames(currentPath ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-500 hover:bg-gray-50', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold')}>
                                                 <item.icon
-                                                    className={classNames(item.current ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600', 'h-6 w-6 shrink-0')}
+                                                    className={classNames(currentPath ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-500', 'h-6 w-6 shrink-0')}
                                                     aria-hidden="true"/>
                                                 {item.name}
                                             </a>
                                         </li>
-                                    ))}
+                                    })
+                                    }
                                 </ul>
                             </li>
                             <li className="mt-auto">

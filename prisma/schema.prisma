@@ -17,7 +17,7 @@ model Product {
   price        Decimal        @db.Decimal(10, 2)
   brand        String?
   stock        Int?
-  rating       Decimal        @db.Decimal(2, 1)
+  rating       Decimal        @default(3.5) @db.Decimal(2, 1)
   thumbnail    String?        @db.VarChar(255)
   category     Category       @relation(fields: [categoryId], references: [id])
   categoryId   Int
@@ -113,7 +113,7 @@ model Session {
 
 model User {
   id             String    @id @default(cuid())
-  name           String?
+  name           String?   @unique
   email          String?   @unique
   emailVerified  DateTime?
   hashedPassword String?

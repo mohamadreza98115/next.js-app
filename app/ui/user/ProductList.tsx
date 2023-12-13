@@ -1,6 +1,6 @@
 // const products = [
 //     {
-//         id: 1,
+//         [id]: 1,
 //         name: 'Basic Tee 8-Pack',
 //         href: '#',
 //         price: '$256',
@@ -10,7 +10,7 @@
 //         imageAlt: 'Eight shirts arranged on table in black, olive, grey, blue, white, red, mustard, and green.',
 //     },
 //     {
-//         id: 2,
+//         [id]: 2,
 //         name: 'Basic Tee',
 //         href: '#',
 //         price: '$32',

@@ -1,10 +1,18 @@
 'use client'
 import {useState} from 'react'
-import ModalDialogToDeleteUser from "@/app/ui/e-commerce/ModalDialogToDeleteUser";
+import ModalDialogToDeleteUser from "@/app/ui/user/ModalDialogToDeleteUser";
 import {FieldValues, useForm} from "react-hook-form";
 import {useSession} from "next-auth/react";
 
-export default function Profile() {
+interface Props {
+    user: {
+        email: string;
+        name: string;
+        role: string;
+    }
+}
+
+export default function Profile({profileData}: Props) {
     const [open, setOpen] = useState(false)
     const {data} = useSession();
     const {register, getValues, handleSubmit} = useForm({
