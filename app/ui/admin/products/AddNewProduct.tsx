@@ -1,57 +1,86 @@
 'use client'
-import React, {Fragment, useRef, useState} from 'react'
+import {Fragment, useRef, useState} from 'react'
 import {Dialog, Listbox, Transition} from '@headlessui/react'
 import {CheckIcon, ChevronUpDownIcon, ExclamationCircleIcon, PlusIcon} from "@heroicons/react/20/solid";
-import {Controller, FieldValues, useForm} from "react-hook-form";
+import {Controller, FieldValues, SubmitHandler, useForm} from "react-hook-form";
 import className from "clsx";
-import {baseUrl, categories} from "@/app/ui/constants";
-import {z} from 'zod'
+import {categories} from "@/app/ui/constants";
 import {zodResolver} from "@hookform/resolvers/zod";
-import axios from "axios";
-
-const schema = z.object({
-    name: z.string().min(3, "Name must contain at least 3 character(s)"),
-    price: z.number().nonnegative(),
-    brand: z.string().min(3, "brand must contain at least 3 character(s)"),
-    category: z.object({name: z.string(),}),
-    thumbnail: z.string().url(),
-    description: z.string().min(30)
-});
+import {z} from 'zod'
+import {useRouter} from "next/navigation";
+import SuccessAlert from "@/app/ui/SuccessAlert";
+import {saveProduct} from "@/app/actions";
 
 const input_error_classes = "block w-full rounded-md border-0 py-1.5 pr-10 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
 
+
+const schema = z.object({
+    name: z.string().min(3, "Name must contain at least 3 character(s)"),
+    description: z.string().min(30, "description must contain at least 30 character(s)"),
+    price: z.number().positive(),
+    brand: z.string(),
+    stock: z.number().positive(),
+    rating: z.number().optional(),
+    thumbnail: z.string().url(),
+    category: z.object({
+        id: z.number(),
+        name: z.string()
+    })
+})
+
+type FormValueTypes = z.infer<typeof schema>
+
 export default function AddNewProduct() {
     const [open, setOpen] = useState(false);
+    const [showAlert, setAlert] = useState(false);
+    const router = useRouter();
     const {
         register,
         control,
         reset,
-        setValue,
-        handleSubmit, getValues,
+        handleSubmit,
         formState: {errors}
-    } = useForm({
+    } = useForm<FormValueTypes>({
         resolver: zodResolver(schema),
-        defaultValues: {category: categories[0], name: '', brand: "", price: '', thumbnail: "", description: ""}
+        defaultValues: {
+            category: categories[0],
+            name: '',
+            brand: "",
+            price: parseInt(""),
+            thumbnail: "",
+            description: "",
+            stock: 1
+        }
     });
 
     const cancelButtonRef = useRef(null)
 
-    const onSubmit = async (values: FieldValues) => {
-        const {category, brand, name, price, description, thumbnail} = values;
-        const Category = categories.filter(c => c.name === category.name);
-        await axios.post(`${baseUrl}/api/products`, {
-            categoryId: Category[0].id,
-            brand,
+    const onSubmit: SubmitHandler<FormValueTypes> = async (values: FieldValues) => {
+        const {name, description, thumbnail, brand, stock, price, category} = values;
+        const categoryId = categories.filter(c => c.id === category["id"]);
+        const result = await saveProduct({
             name,
-            price,
             description,
-            thumbnail
-        });
-        reset();
+            thumbnail,
+            brand,
+            stock,
+            price,
+            categoryId: categoryId[0].id
+        })
+        if (!result.success) {
+            console.log(result.error)
+        }
+        if (result.success) {
+            console.log(result.message);
+            reset();
+            setOpen(false);
+            setAlert(true)
+        }
     }
 
     return (
         <>
+            <SuccessAlert show={showAlert} setShow={setAlert}/>
             <button
                 onClick={() => setOpen(true)}
                 type="button"
@@ -187,78 +216,130 @@ export default function AddNewProduct() {
                                                                         </div>
                                                                     }/>
 
-                                                        <Controller control={control} name={"category"}
-                                                                    render={({field}) => {
-                                                                        return <Listbox {...field}>
-                                                                            {({open}) => (
-                                                                                <>
-                                                                                    <Listbox.Label
-                                                                                        className="block mt-2 text-sm font-medium leading-6 text-gray-900">
-                                                                                        Category
-                                                                                    </Listbox.Label>
-                                                                                    <div className="relative mt-2">
-                                                                                        <Listbox.Button
-                                                                                            className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                                                                                         <span
-                                                                                             className="block truncate">
-                                                                                            {field.value?.name}
-                                                                                         </span>
-                                                                                            <span
-                                                                                                className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                                                                                                   <ChevronUpDownIcon
-                                                                                                       className="h-5 w-5 text-gray-400"
-                                                                                                       aria-hidden="true"/>
-                                                                                           </span>
-                                                                                        </Listbox.Button>
-                                                                                        <Transition
-                                                                                            show={open}
-                                                                                            as={Fragment}
-                                                                                            leave="transition ease-in duration-100"
-                                                                                            leaveFrom="opacity-100"
-                                                                                            leaveTo="opacity-0"
-                                                                                        >
-                                                                                            <Listbox.Options
-                                                                                                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                                                                                {categories.map((category) => (
-                                                                                                    <Listbox.Option
-                                                                                                        key={category.id}
-                                                                                                        className={({active}) => className(active ? 'bg-indigo-600 text-white' : 'text-gray-900', 'relative cursor-default select-none py-2 pl-8 pr-4')}
-                                                                                                        value={category}>
-                                                                                                        {({
-                                                                                                              selected,
-                                                                                                              active
-                                                                                                          }) => (
-                                                                                                            <>
-                                                                                                          <span
-                                                                                                              className={className(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
-                                                                                                             {category.name}
-                                                                                                          </span>
+                                                        <div>
+                                                            <label htmlFor="stock"
+                                                                   className="block text-sm font-medium leading-6 text-gray-900">
+                                                                Stock
+                                                            </label>
+                                                            <div
+                                                                className="relative mt-2 rounded-md shadow-sm">
+                                                                <input
+                                                                    type="number"
+                                                                    {...register("stock", {valueAsNumber: true})}
+                                                                    id="stock"
+                                                                    className={className(`block w-full min-w-[20rem] rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`, errors.brand && input_error_classes)}
+                                                                />
+                                                                {errors.stock && <div
+                                                                    className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                                                    <ExclamationCircleIcon
+                                                                        className="h-5 w-5 text-red-500"
+                                                                        aria-hidden="true"/>
+                                                                </div>}
+                                                            </div>
+                                                            {errors.stock &&
+                                                                <p className="mt-2 text-sm text-red-600"
+                                                                   id="email-error">
+                                                                    {errors.stock.message}
+                                                                </p>}
+                                                        </div>
 
-                                                                                                                {selected ? (
-                                                                                                                    <span
-                                                                                                                        className={className(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 left-0 flex items-center pl-1.5')}>
-                                                                                                                  <CheckIcon
-                                                                                                                      className="h-5 w-5"
-                                                                                                                      aria-hidden="true"/>
-                                                                                                                </span>
-                                                                                                                ) : null}
-                                                                                                            </>
-                                                                                                        )}
-                                                                                                    </Listbox.Option>
-                                                                                                ))}
-                                                                                            </Listbox.Options>
-                                                                                        </Transition>
-                                                                                    </div>
-                                                                                    {errors.category &&
-                                                                                        <p className="mt-2 text-sm text-red-600"
-                                                                                           id="email-error">
-                                                                                            {errors.category.message}
-                                                                                        </p>}
-                                                                                </>
-                                                                            )}
-                                                                        </Listbox>
-                                                                    }
-                                                                    }
+                                                        <Controller
+                                                            name="category"
+                                                            control={control}
+                                                            render={({field}) => {
+                                                                return (
+                                                                    <Listbox {...field}>
+                                                                        {({open}) => (
+                                                                            <>
+                                                                                <Listbox.Label
+                                                                                    className="block mt-2 text-sm font-medium leading-6 text-gray-900">
+                                                                                    Category
+                                                                                </Listbox.Label>
+                                                                                <div className="relative mt-2">
+                                                                                    <Listbox.Button
+                                                                                        className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <span className="block truncate">
+                          {field.value.name}
+                        </span>
+                                                                                        <span
+                                                                                            className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <ChevronUpDownIcon
+                              className="h-5 w-5 text-gray-400"
+                              aria-hidden="true"
+                          />
+                        </span>
+                                                                                    </Listbox.Button>
+                                                                                    <Transition
+                                                                                        show={open}
+                                                                                        as={Fragment}
+                                                                                        leave="transition ease-in duration-100"
+                                                                                        leaveFrom="opacity-100"
+                                                                                        leaveTo="opacity-0"
+                                                                                    >
+                                                                                        <Listbox.Options
+                                                                                            className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                                                            {categories.map((category) => (
+                                                                                                <Listbox.Option
+                                                                                                    key={category.id}
+                                                                                                    className={({active}) =>
+                                                                                                        className(
+                                                                                                            active
+                                                                                                                ? "bg-indigo-600 text-white"
+                                                                                                                : "text-gray-900",
+                                                                                                            "relative cursor-default select-none py-2 pl-8 pr-4"
+                                                                                                        )
+                                                                                                    }
+                                                                                                    value={category}
+                                                                                                >
+                                                                                                    {({
+                                                                                                          selected,
+                                                                                                          active
+                                                                                                      }) => (
+                                                                                                        <>
+                                  <span
+                                      className={className(
+                                          selected
+                                              ? "font-semibold"
+                                              : "font-normal",
+                                          "block truncate"
+                                      )}
+                                  >
+                                    {category.name}
+                                  </span>
+
+                                                                                                            {selected ? (
+                                                                                                                <span
+                                                                                                                    className={className(
+                                                                                                                        active
+                                                                                                                            ? "text-white"
+                                                                                                                            : "text-indigo-600",
+                                                                                                                        "absolute inset-y-0 left-0 flex items-center pl-1.5"
+                                                                                                                    )}
+                                                                                                                >
+                                      <CheckIcon
+                                          className="h-5 w-5"
+                                          aria-hidden="true"
+                                      />
+                                    </span>
+                                                                                                            ) : null}
+                                                                                                        </>
+                                                                                                    )}
+                                                                                                </Listbox.Option>
+                                                                                            ))}
+                                                                                        </Listbox.Options>
+                                                                                    </Transition>
+                                                                                </div>
+                                                                                {errors.category && (
+                                                                                    <p className="mt-2 text-sm text-red-600"
+                                                                                       id="email-error">
+                                                                                        {errors.category.message}
+                                                                                    </p>
+                                                                                )}
+                                                                            </>
+                                                                        )}
+                                                                    </Listbox>
+                                                                );
+                                                            }}
                                                         />
 
                                                         <Controller name={'thumbnail'} control={control}

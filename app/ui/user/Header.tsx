@@ -31,7 +31,7 @@ export default function Header() {
                             stopped caring
                             about that. Our new strategy is to write a bunch of things that look really good in the
                             headlines, then
-                            clarify in the small print but hope people don't actually read it.
+                            clarify in the small print but hope people don&apos;t actually read it.
                         </p>
                     </div>
                     <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-3">

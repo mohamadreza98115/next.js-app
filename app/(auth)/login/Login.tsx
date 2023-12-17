@@ -1,12 +1,14 @@
 'use client'
 import React from 'react';
-import {ExclamationCircleIcon} from "@heroicons/react/20/solid";
+import {EnvelopeIcon, ExclamationCircleIcon, LockClosedIcon} from "@heroicons/react/20/solid";
 import className from "clsx";
 import {FieldValues, useForm} from "react-hook-form";
 import {z} from 'zod';
-import {zodResolver} from "@hookform/resolvers/zod";
-import {EnvelopeIcon, LockClosedIcon} from "@heroicons/react/20/solid";
 import {signIn, useSession} from "next-auth/react";
+import Link from "next/link";
+import Image from 'next/image'
+import {zodResolver} from "@hookform/resolvers/zod";
+import {input_error_classes} from "@/app/ui/constants";
 
 const schema = z.object({
     email: z.string().email("Invalid email format"),
@@ -14,33 +16,32 @@ const schema = z.object({
 })
 
 type FormFieldTypes = z.input<typeof schema>;
-
-const input_error_classes = "block w-full rounded-md border-0 py-1.5 pr-10 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
 const adminPage = "http://localhost:3000/admin";
 const userPage = "http://localhost:3000/user";
-const homePage = "http://localhost:3000";
 
-const Login = ({callbackUrl}: { callbackUrl?: string }) => {
+const Login = () => {
+    const {data: session} = useSession();
+
+    const isAdmin = session?.user.role === 'ADMIN';
+    const isUser = session?.user.role === 'USER';
     const {
         register,
         reset,
         handleSubmit,
         formState: {errors}
-    } = useForm<FormFieldTypes>({resolver: zodResolver(schema)});
-
-    const {data: session} = useSession();
-
-    const isAdmin = session?.user.role === 'ADMIN';
-    const isUser = session?.user.role === "USER";
-
+    } = useForm<FormFieldTypes>({resolver: zodResolver(schema)})
     const onSubmit = async (values: FieldValues) => {
-        await signIn("credentials", {
+        const result = await signIn("credentials", {
             email: values?.email,
             password: values?.password,
             redirect: true,
             callbackUrl: isUser ? userPage : adminPage
         });
-        reset();
+
+        if (result?.status === 200) {
+            reset();
+            console.log(session?.user.role)
+        }
     }
 
     return (
@@ -48,7 +49,9 @@ const Login = ({callbackUrl}: { callbackUrl?: string }) => {
             <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
                 <div className="mx-auto w-full max-w-sm lg:w-96">
                     <div>
-                        <img
+                        <Image
+                            width={40}
+                            height={40}
                             className="h-10 w-auto"
                             src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
                             alt="Your Company"
@@ -132,9 +135,10 @@ const Login = ({callbackUrl}: { callbackUrl?: string }) => {
                                     </div>
 
                                     <div className="text-sm leading-6">
-                                        <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                                            Forgot password?
-                                        </a>
+                                        <Link href="/register"
+                                              className="font-semibold text-indigo-600 hover:text-indigo-500">
+                                            Create account?
+                                        </Link>
                                     </div>
                                 </div>
 
@@ -177,7 +181,6 @@ const Login = ({callbackUrl}: { callbackUrl?: string }) => {
                                 </a>
 
                                 <a
-                                    href="#"
                                     className="flex w-full items-center justify-center gap-3 rounded-md bg-[#24292F] px-3 py-1.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#24292F]"
                                 >
                                     <svg className="h-5 w-5" aria-hidden="true" fill="currentColor"

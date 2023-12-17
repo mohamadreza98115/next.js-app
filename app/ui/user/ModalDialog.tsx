@@ -8,7 +8,7 @@ interface Props {
     setOpen: (value: boolean) => void;
 }
 
-export default function ModalDialogToDeleteUser({open, setOpen}: Props) {
+export default function ModalDialog({open, setOpen}: Props) {
     const cancelButtonRef = useRef(null)
 
     return (

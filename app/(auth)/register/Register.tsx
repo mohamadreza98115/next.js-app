@@ -5,38 +5,51 @@ import className from "clsx";
 import {FieldValues, useForm} from "react-hook-form";
 import {z} from 'zod';
 import {zodResolver} from "@hookform/resolvers/zod";
-import axios from "axios";
 import {useRouter} from "next/navigation";
 import SuccessAlert from "@/app/ui/SuccessAlert";
+import {saveUser} from "@/app/actions";
+import {UserSchema} from "@/services/schema";
+import Link from "next/link";
 
-const schema = z.object({
-    name: z.string().min(3, "Username must contain at least 3 character(s)"),
-    email: z.string().email("Invalid email format"),
-    password: z.string().min(6, "password must be at least 6 characters")
-})
-
-type FormFieldTypes = z.input<typeof schema>;
+type FormFieldTypes = z.input<typeof UserSchema>;
 
 const input_error_classes = "block w-full rounded-md border-0 py-1.5 pr-10 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
 
 const Register = () => {
     const router = useRouter();
+    const [error, setError] = useState({emailExist: "", nameExist: ""});
     const {
         register,
         reset,
         handleSubmit,
         formState: {errors}
-    } = useForm<FormFieldTypes>({resolver: zodResolver(schema)});
+    } = useForm<FormFieldTypes>({resolver: zodResolver(UserSchema)});
     const [show, setShow] = useState(false)
 
     const RegisterUser = async (values: FieldValues) => {
-        await axios.post('/api/register', values)
-            .then(() => {
-                setShow(true);
-                router.push('/api/auth/signin');
-                reset();
-            })
-            .catch(() => setShow(false))
+        const {name, email, password} = values;
+        const result = await saveUser({name, email, password});
+        if (!result) {
+            console.log("Something went wrong!");
+        }
+        if (!result.success) {
+            console.log(result.error);
+            if (result.nameExist) {
+                const nameExist = result.nameExist;
+                setError({emailExist: "", nameExist})
+            }
+            if (result.emailExist) {
+                const emailExist = result.emailExist;
+                setError({nameExist: "", emailExist})
+            }
+            return;
+        }
+        if (result.success) {
+            setError({nameExist: "", emailExist: ""})
+            reset();
+            setShow(true)
+            router.push('/login');
+        }
     }
 
     return (
@@ -80,6 +93,9 @@ const Register = () => {
                                     <ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true"/>
                                 </div>}
                             </div>
+                            {error.nameExist && <p className="mt-2 text-sm text-red-600" id="email-error">
+                                {error.nameExist}
+                            </p>}
                             {errors.name && <p className="mt-2 text-sm text-red-600" id="email-error">
                                 {errors.name.message}
                             </p>}
@@ -108,6 +124,9 @@ const Register = () => {
                                     <ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true"/>
                                 </div>}
                             </div>
+                            {error.emailExist && <p className="mt-2 text-sm text-red-600" id="email-error">
+                                {error.emailExist}
+                            </p>}
                             {errors.email && <p className="mt-2 text-sm text-red-600" id="email-error">
                                 {errors.email.message}
                             </p>}
@@ -146,8 +165,9 @@ const Register = () => {
                                 type="submit"
                                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                             >
-                                Sign in
+                                Register
                             </button>
+                            <p className={"text-sm leading-6 mt-2 text-gray-700"}>Already have an account? <Link className={"font-semibold text-indigo-600 hover:text-indigo-500 underline tracking-wide"} href={"/login"}>login</Link></p>
                         </div>
                     </form>
                 </div>

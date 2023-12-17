@@ -4,6 +4,7 @@ import {ChevronDownIcon, MagnifyingGlassIcon} from '@heroicons/react/20/solid'
 import {BellIcon} from '@heroicons/react/24/outline'
 import {userNavigation} from "@/app/ui/constants";
 import Image from "next/image";
+import Link from "next/link";
 
 type ClassNames = string[];
 
@@ -70,7 +71,7 @@ const Appbar = () => {
                             {userNavigation.map((item: any) => (
                                 <Menu.Item key={item.name}>
                                     {({active}) => (
-                                        <a
+                                        <Link
                                             href={item.href}
                                             className={classNames(
                                                 active ? 'bg-gray-50' : '',
@@ -78,7 +79,7 @@ const Appbar = () => {
                                             )}
                                         >
                                             {item.name}
-                                        </a>
+                                        </Link>
                                     )}
                                 </Menu.Item>
                             ))}

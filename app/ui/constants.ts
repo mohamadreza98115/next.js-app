@@ -5,7 +5,7 @@ export const baseUrl = "http://localhost:3000";
 
 export const userNavigation = [
     {name: 'Your profile', href: '#'},
-    {name: 'Sign out', href: '#'},
+    {name: 'Sign out', href: '/api/auth/signout'},
 ]
 
 export const categories = [
@@ -33,6 +33,9 @@ export const userNav = [
     {name: 'Project', href: '/user/projects'},
     {name: 'Calendar', href: '/user/calendar'},
 ]
+
+export const input_error_classes = "block w-full rounded-md border-0 py-1.5 pr-10 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+
 
 export const teams = [
     {id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false},

@@ -41,7 +41,6 @@ export default async function Home({searchParams}: Props) {
                     <ProductList products={products}/>
                 </Suspense>
             </div>
-            {products.length > 0 && <Pagination/>}
             {/* Footer */}
             <Footer/>
         </div>

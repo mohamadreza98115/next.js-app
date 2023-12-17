@@ -2,12 +2,10 @@ import AddNewProduct from "@/app/ui/admin/products/AddNewProduct";
 import {Product} from "@/types";
 import Image from "next/image";
 import Link from "next/link";
+import {fetchAllProducts} from "@/services/products";
 
-interface Props {
-    products: Product[]
-}
-
-export default function ProductTable({products}: Props) {
+export default async function ProductTable() {
+    const products: Product[] = await fetchAllProducts();
     return (
         <div className="px-4 sm:px-6 lg:px-8">
             <div className="sm:flex sm:items-center">
@@ -70,7 +68,7 @@ export default function ProductTable({products}: Props) {
                                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                                         <div className={'text-gray-900'}>${product.price}</div>
                                     </td>
-                                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{product.brand}</td>
+                                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{product.brand?.substring(0, 10)}</td>
                                     <td className="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                                         <Link href={`/admin/products/${product.id}`}
                                               className="text-indigo-600 hover:text-indigo-900">

@@ -1,6 +1,6 @@
 'use client'
 import {useState} from 'react'
-import ModalDialogToDeleteUser from "@/app/ui/user/ModalDialogToDeleteUser";
+import ModalDialog from "@/app/ui/user/ModalDialog";
 import {FieldValues, useForm} from "react-hook-form";
 import {useSession} from "next-auth/react";
 
@@ -205,7 +205,7 @@ export default function Profile({profileData}: Props) {
                             >
                                 Yes, delete my account
                             </button>
-                            <ModalDialogToDeleteUser open={open} setOpen={setOpen}/>
+                            <ModalDialog open={open} setOpen={setOpen}/>
                         </div>
                     </div>
                 </div>

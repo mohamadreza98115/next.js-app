@@ -1,5 +1,5 @@
 'use client'
-import React, {Fragment, useRef, useState} from 'react';
+import {Fragment, useRef, useState} from 'react';
 import {Dialog, Transition} from "@headlessui/react";
 import {
     EnvelopeIcon,
@@ -9,14 +9,13 @@ import {
     PlusIcon,
     UserIcon
 } from "@heroicons/react/20/solid";
-import {Controller, FieldValues, useForm} from "react-hook-form";
+import {Controller, SubmitHandler, useForm} from "react-hook-form";
 import className from "clsx";
-import {baseUrl} from "@/app/ui/constants";
+import {input_error_classes} from "@/app/ui/constants";
 import {z} from 'zod'
 import {zodResolver} from "@hookform/resolvers/zod";
-import axios from "axios";
 import SuccessAlert from "@/app/ui/SuccessAlert";
-import {mutate} from "swr";
+import {saveUser} from "@/app/actions";
 
 const schema = z.object({
     name: z.string().min(3, "Name must contain at least 3 character(s)"),
@@ -29,36 +28,43 @@ const schema = z.object({
 
 type FormValueTypes = z.infer<typeof schema>
 
-const input_error_classes = "block w-full rounded-md border-0 py-1.5 pr-10 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
 
 const AddNewUser = () => {
     const [open, setOpen] = useState(false);
     const [show, setShow] = useState(false);
+    const [error, setError] = useState({emailExist: "", nameExist: ""});
     const cancelButtonRef = useRef(null)
     const {
         control,
-        register,
         handleSubmit,
-        getValues,
-        setValue,
         reset,
         formState: {errors}
     } = useForm<FormValueTypes>({resolver: zodResolver(schema), defaultValues: {name: "", email: "", password: ""}});
-    const onSubmit = async (values: FieldValues) => {
-        axios.post(`${baseUrl}/api/users`, values).then(() => {
+    const onSubmit: SubmitHandler<FormValueTypes> = async (values) => {
+        const result = await saveUser(values);
+        if (!result) {
+            console.log("Something went wrong!");
+            return;
+        }
+        if (!result.success) {
+            console.log(result.error);
+            if (result.nameExist) {
+                const nameExist = result.nameExist;
+                setError({emailExist: "", nameExist})
+            }
+            if (result.emailExist) {
+                const emailExist = result.emailExist;
+                setError({nameExist: "", emailExist})
+            }
+            return;
+        }
+        if (result.success) {
+            setError({nameExist: "", emailExist: ""})
             reset();
             setShow(true)
-            setOpen(false);
-            mutate("users");
-        }).catch((err) => {
-            const data = err?.response?.data;
-            if (data?.nameExist)
-                setValue("emailExist", data?.nameExist);
-            if (data?.emailExist)
-                setValue("emailExist", data?.emailExist)
-        })
+            setOpen(false)
+        }
     }
-    console.log(getValues("nameExist"));
     return (
         <>
             <SuccessAlert show={show} setShow={setShow}/>
@@ -67,7 +73,7 @@ const AddNewUser = () => {
                 type="button"
                 className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-                Add product
+                Add user
             </button>
             <Transition.Root show={open} as={Fragment}>
                 <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={setOpen}>
@@ -109,6 +115,8 @@ const AddNewUser = () => {
                                                     Add User
                                                 </Dialog.Title>
                                                 <form onSubmit={handleSubmit(onSubmit)} className={'mt-2'}>
+
+
                                                     <Controller control={control} name={"name"}
                                                                 render={({field}) => <div>
                                                                     <label htmlFor="name"
@@ -136,6 +144,11 @@ const AddNewUser = () => {
                                                                                 aria-hidden="true"/>
                                                                         </div>}
                                                                     </div>
+                                                                    {error.nameExist &&
+                                                                        <p className="mt-2 text-sm text-red-600"
+                                                                           id="name-error">
+                                                                            {error.nameExist}
+                                                                        </p>}
                                                                     {errors.name &&
                                                                         <p className="mt-2 text-sm text-red-600"
                                                                            id="name-error">
@@ -172,6 +185,11 @@ const AddNewUser = () => {
                                                                                     aria-hidden="true"/>
                                                                             </div>}
                                                                         </div>
+                                                                        {error.emailExist &&
+                                                                            <p className="mt-2 text-sm text-red-600"
+                                                                               id="email-error">
+                                                                                {error.emailExist}
+                                                                            </p>}
                                                                         {errors.email &&
                                                                             <p className="mt-2 text-sm text-red-600"
                                                                                id="email-error">
